@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - E-commerce Store{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-5">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}">
+            {% else %}
+                <div class="bg-light text-center p-5">No Image</div>
+            {% endif %}
+        </div>
+        <div class="col-md-7">
+            <h1>{{ product.name }}</h1>
+            <p class="lead text-primary">${{ product.price }}</p>
+            <p>{{ product.description }}</p>
+            
+            <div class="d-flex mb-3">
+                <form method="post" action="{% url 'cart:add_to_cart' product.id %}" class="me-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Add to Cart</button>
+                </form>
+                
+                {% if user.is_authenticated %}
+                    <button id="like-button" class="btn btn-outline-danger" data-product-id="{{ product.id }}">
+                        <i class="bi bi-heart"></i> Like
+                    </button>
+                {% endif %}
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header">Product Details</div>
+                <div class="card-body">
+                    <p><strong>Category:</strong> {{ product.category.name }}</p>
+                    <p><strong>In Stock:</strong> {{ product.stock }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if user.is_authenticated and similar_products %}
+        <div class="recommendation-section mt-5 p-3">
+            <h3>You Might Also Like</h3>
+            <div class="row">
+                {% for product in similar_products %}
+                    <div class="col-md-3 mb-4">
+                        <div class="card product-card">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                            {% else %}
+                                <div class="bg-light text-center p-4">No Image</div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ product.name }}</h5>
+                                <p class="card-text text-primary">${{ product.price }}</p>
+                                <a href="{% url 'products:product_detail' product.id %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const likeButton = document.getElementById('like-button');
+            
+            if (likeButton) {
+                likeButton.addEventListener('click', function() {
+                    const productId = this.dataset.productId;
+                    
+                    fetch(`/like/${productId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            likeButton.classList.remove('btn-outline-danger');
+                            likeButton.classList.add('btn-danger');
+                            likeButton.innerHTML = '<i class="bi bi-heart-fill"></i> Liked';
+                            likeButton.disabled = true;
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+{% endblock %}

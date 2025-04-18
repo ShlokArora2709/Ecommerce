@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Cart - E-commerce Store{% endblock %}
+
+{% block content %}
+    <h1>Your Shopping Cart</h1>
+    
+    {% if cart_items %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'products:product_detail' item.product.id %}">
+                                    {{ item.product.name }}
+                                </a>
+                            </td>
+                            <td>${{ item.product.price }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>${{ item.total_price }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                        <td><strong>${{ total }}</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        
+        <div class="d-flex justify-content-end">
+            <a href="{% url 'products:product_list' %}" class="btn btn-outline-secondary me-2">
+                Continue Shopping
+            </a>
+            <a href="{% url 'cart:checkout' %}" class="btn btn-primary">
+                Proceed to Checkout
+            </a>
+        </div>
+        
+        {% if recommended_products %}
+            <div class="recommendation-section mt-5 p-3">
+                <h3>Recommended Products</h3>
+                <div class="row">
+                    {% for product in recommended_products %}
+                        <div class="col-md-3 mb-4">
+                            <div class="card product-card">
+                                {% if product.image %}
+                                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                                {% else %}
+                                    <div class="bg-light text-center p-4">No Image</div>
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ product.name }}</h5>
+                                    <p class="card-text text-primary">${{ product.price }}</p>
+                                    <a href="{% url 'products:product_detail' product.id %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-info">
+            Your cart is empty. <a href="{% url 'products:product_list' %}">Start shopping</a>
+        </div>
+    {% endif %}
+{% endblock %}

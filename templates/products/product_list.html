@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Products - E-commerce Store{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-header">Categories</div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'products:product_list' %}" class="list-group-item {% if not selected_category %}active{% endif %}">
+                        All Categories
+                    </a>
+                    {% for category in categories %}
+                        <a href="{% url 'products:product_list' %}?category={{ category.id }}" 
+                           class="list-group-item {% if selected_category == category.id|stringformat:'i' %}active{% endif %}">
+                            {{ category.name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <h2>Products</h2>
+            {% if user.is_authenticated and recommended_products %}
+                <div class="recommendation-section p-3 mb-4">
+                    <h3>Recommended for You</h3>
+                    <div class="row">
+                        {% for product in recommended_products %}
+                            <div class="col-md-3 mb-4">
+                                <div class="card product-card">
+                                    {% if product.image %}
+                                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                                    {% else %}
+                                        <div class="bg-light text-center p-4">No Image</div>
+                                    {% endif %}
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ product.name }}</h5>
+                                        <p class="card-text text-primary">${{ product.price }}</p>
+                                        <a href="{% url 'products:product_detail' product.id %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div class="row">
+                {% for product in products %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card product-card">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                            {% else %}
+                                <div class="bg-light text-center p-5">No Image</div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ product.name }}</h5>
+                                <p class="card-text text-primary">${{ product.price }}</p>
+                                <a href="{% url 'products:product_detail' product.id %}" class="btn btn-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12">
+                        <div class="alert alert-info">No products found.</div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
